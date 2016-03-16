@@ -1,0 +1,173 @@
+<!DOCTYPE HTML>
+<head>
+	<title>Crash Up 2</title>
+	<meta charset=utf-8>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no">
+	<meta description="Displaying car crashes around Tasmania" >
+	<!--<script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.js'></script>
+	<link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.css' rel='stylesheet' /> -->
+	<script type="text/javascript" src="./js-lib/leaflet.js"></script> <!-- Leaflet maps JS -->
+	<link rel="stylesheet" href="./css-lib/leaflet.css"/> <!-- Leaflet maps CSS -->
+	<!-- <script type="text/javascript" src="../../js/heatmap.min.js"></script> -->
+	<!-- <script type="text/javascript" src="../../js/leaflet-heatmap.js"></script> -->
+	<script type="text/javascript" src="./js-lib/leaflet-heat.js"></script>
+	<script type="text/javascript" src="./js-lib/bouncemarker.js"></script>
+	
+	<!-- If remote 
+	<link rel="stylesheet" href="http://l33tllama.no-ip.org/css/font-awesome.min.css">
+	<link rel="stylesheet" href="http://l33tllama.no-ip.org/css/cal-heatmap.css" />
+	<script type="text/javascript" src="http://l33tllama.no-ip.org/js/cal-heatmap-2.js"></script>-->
+	<!-- if local -->
+	
+	<script src="./js-lib/yui-min.js"></script> <!-- YUI for slider, buttons? -->
+	<link rel="stylesheet" href="./css-lib/pure-min.css"> <!-- pur for CSS layout enhancements -->
+	<script type="text/javascript" src="./js-lib/d3.v3.min.js"></script> <!-- d3 for cal-heatmap and easier data loading -->
+	<link rel="stylesheet" href="./css-lib/font-awesome.min.css"> <!-- icons! -->
+	<link rel="stylesheet" href="./css-lib/cal-heatmap.css" /> <!-- heatmap calendar using d3 -->
+	<script type="text/javascript" src="./js-lib/cal-heatmap.js"></script> <!--heatmap calendar using d3 -->
+	<link rel="stylesheet" href="./css-lib/animate.css/animate.css" /> <!-- pretty animations using css -->
+	<script type="text/javascript" src="./js-lib/proj4-src.js"></script> <!-- proj to lon/lat -->
+	
+	<link rel="stylesheet" href="crashup-style.css" /> <!-- pCSS for CrashupV2-->
+
+</head>
+<body>
+	<!-- Sidebar -->
+	<div class="sidebar">
+        <h1 class="app-title animated zoomInLeft">CrashUp 2</h1>
+        <div class="sidebar-info">
+            <!-- Date selector -->
+            <!--<div class=""> -->
+            <form class="form-container pure-form pure-form-aligned">
+                <fieldset>
+                    <legend>Date</legend>
+                    <div class="date-options">
+                        <div class="pure-control-group">
+                            <label for="year-selector">Year</label>
+                            <button id="prev-year-button" class="pure-button narrow-button">
+                                <i class="fa fa-step-backward"> </i>
+                            </button>
+                            <select id="year-selector" autocomplete="off">
+                                <option selected="selected">2007</option>
+                                <option value="2008">2008</option>
+                                <option value="2009">2009</option>
+                                <option value="2010">2010</option>
+                                <option value="2011">2011</option>
+                                <option value="2012">2012</option>
+                                <option value="2013">2013</option>
+                            </select>
+                            <button id="next-year-button" class="pure-button narrow-button">
+                                <i class="fa fa-step-forward"> </i>
+                            </button>
+                        </div>
+                        <div class="pure-control-group">
+                            <label for="month-selector">Month</label>
+
+                            <button id="prev-month-button" class="pure-button narrow-button">
+                                <i class="fa fa-step-backward"> </i>
+                            </button>
+                            <select id="month-selector" autocomplete="off">
+                                <option value="January">Jan</option>
+                                <option value="February">Feb</option>
+                                <option value="March">Mar</option>
+                                <option value="April">Apr</option>
+                                <option value="May">May</option>
+                                <option value="June">Jun</option>
+                                <option value="July">Jul</option>
+                                <option value="August">Aug</option>
+                                <option value="September">Sept</option>
+                                <option value="October">Oct</option>
+                                <option value="November">Nov</option>
+                                <option value="December">Dec</option>
+                            </select>
+                            <button id="next-month-button" class="pure-button narrow-button">
+                                <i class="fa fa-step-forward"> </i>
+                            </button>
+                        </div>
+                        <div class="pure-control-group all-month">
+                            <label id="whole-label">Whole</label>
+                            <button type="submit" id="whole-month" class="pure-button pure-button-primary">Month</button>
+                            <button type="submit" id="whole-year" class="pure-button pure-button-primary">Year</button>
+                        </div>
+                        <!--<div class="pure-control-group all-year">
+
+                        </div>-->
+                    </div>
+
+                </fieldset>
+            </form>
+
+            <form class="pure-form">
+                <legend>Monthly Heatmap</legend>
+                <div class="cal-wrapper">
+                    <div class="pure-u" id="cal-heatmap"></div><br/>
+                   <h6>Note: Only showing markers for crash incidents that involved an injury or fatality.</h6>
+                </div>
+                <legend>Fatal Incidents in <span id="year-text">2007</span></legend>
+                <div id="fatal-info-wrapper">
+                    <p id="fatal-info">
+                        Shown: <span id="fatal-count">0</span>/<span id="fatal-total">loading</span>
+                        <p><button type="submit" id="show-all-fatal-incidents" class="pure-button pure-button-primary">Show All</button></p>
+                    </p>
+                </div>
+		<div id="about">
+			<p><h6>CrashUp V2 is a re-make of CrashUp, the submission for GovHack 2014 by team Hobart hackerspace.<br/>
+			You should also check out <a href="http://www.hobarthackerspace.org.au">Hobart Hackerspace</a> it is 1337.</h6></p>
+		</div>
+            </form>
+        </div>
+    </div>
+    <div class="pure-u main-content">
+  	
+  	<!-- The map!! -->
+      <div id="map-container">
+          <div id='map'></div>
+          <img id="loading-img" src="./images/loading51.gif"/>
+      </div>
+
+
+	<!-- boundingBox -->
+	<div class="slider-menu" id="controls">
+		<div class="pure-u date-wrapper">
+			<p class="date-label"><span id="current-date-text">1 Jan 2007</span></p>
+		</div>		
+		
+		<button id="restart-button" class="restart-button pure-button">
+				<i class="fa fa-undo"> </i>
+		</button>
+		
+		<div class="button-wrapper">
+			<button id="prev-button" class="next-button pure-button">
+				<i class="fa fa-step-backward"> </i>
+			</button>
+			<button id="play-button" class="play-button pure-button">
+				<!-- TODO: show/hide play+paseu button in code -->
+				<i id="play-icon" class="fa fa-play"> </i>
+				<i id="pause-icon" class="fa fa-pause" hidden > </i>
+			</button>
+			<button id="next-button" class="next-button pure-button">
+				<i class="fa fa-step-forward"> </i>
+			</button>
+		</div>
+		<div class="pure-u pure-menu-selected slider-wrapper yui3-skin-sam">
+		  <span class="pure-u date-slider"> </span><br/>
+		</div>
+	</div>
+	<!--<script type="text/javascript" src="MapboxMap.js"></script> -->
+		<!-- All of the scripts required to run this page.. Nice and sub-divisioned for maximum success -->
+		<script type="text/javascript" src="DataUtils.js"></script>
+		<script type="text/javascript" src="LeafletMap.js"></script>
+		<script type="text/javascript" src="YUISlider.js"></script>
+		<script type="text/javascript" src="CalHeatMap.js"></script>
+		<script type="text/javascript" src="ControlButtons.js"></script>
+		<script type="text/javascript" src="UIElements.js"></script>
+		<script type="text/javascript" src="YUIComboBox.js"></script>
+		<script type="text/javascript" src="CrashUpMain.js"></script>
+		
+		<script>
+			var crashup = new CrashUp(2007);
+	  	</script>
+  </div>
+  <!-- TODO: accredit Hackerspace -->
+  
+</body>
